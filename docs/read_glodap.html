@@ -12,7 +12,7 @@
 <meta name="author" content="Jens Daniel Müller" />
 
 
-<title>read_glodap</title>
+<title>GLODAPv2_2021</title>
 
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -377,9 +377,9 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">read_glodap</h1>
+<h1 class="title toc-ignore">GLODAPv2_2021</h1>
 <h4 class="author">Jens Daniel Müller</h4>
-<h4 class="date">26 September, 2024</h4>
+<h4 class="date">27 September, 2024</h4>
 
 </div>
 
@@ -408,7 +408,7 @@ class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2024-09-26
+<strong>Last updated:</strong> 2024-09-27
 </p>
 <p>
 <strong>Checks:</strong> <span
@@ -539,15 +539,15 @@ project makes it easier to run your code on other machines.</p>
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjensdanielmuellertatrendstreedb7e7274ff4ca19b46b14881e11ce185e7231637targetblankdb7e727a">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongahrefhttpsgithubcomjensdanielmuellertatrendstreed640fbab09e3c34b0ef5f511f9d81f472128e826targetblankd640fbaa">
 <span class="glyphicon glyphicon-ok text-success"
 aria-hidden="true"></span> <strong>Repository version:</strong>
-<a href="https://github.com/jens-daniel-mueller/ta_trends/tree/db7e7274ff4ca19b46b14881e11ce185e7231637" target="_blank">db7e727</a>
+<a href="https://github.com/jens-daniel-mueller/ta_trends/tree/d640fbab09e3c34b0ef5f511f9d81f472128e826" target="_blank">d640fba</a>
 </a>
 </p>
 </div>
 <div
-id="strongRepositoryversionstrongahrefhttpsgithubcomjensdanielmuellertatrendstreedb7e7274ff4ca19b46b14881e11ce185e7231637targetblankdb7e727a"
+id="strongRepositoryversionstrongahrefhttpsgithubcomjensdanielmuellertatrendstreed640fbab09e3c34b0ef5f511f9d81f472128e826targetblankd640fbaa"
 class="panel-collapse collapse">
 <div class="panel-body">
 <p>
@@ -557,7 +557,7 @@ reproducibility.
 </p>
 <p>
 The results in this page were generated with repository version
-<a href="https://github.com/jens-daniel-mueller/ta_trends/tree/db7e7274ff4ca19b46b14881e11ce185e7231637" target="_blank">db7e727</a>.
+<a href="https://github.com/jens-daniel-mueller/ta_trends/tree/d640fbab09e3c34b0ef5f511f9d81f472128e826" target="_blank">d640fba</a>.
 See the <em>Past versions</em> tab to see a history of the changes made
 to the R Markdown and HTML files.
 </p>
@@ -626,6 +626,40 @@ Message
 Rmd
 </td>
 <td>
+<a href="https://github.com/jens-daniel-mueller/ta_trends/blob/d640fbab09e3c34b0ef5f511f9d81f472128e826/analysis/read_glodap.Rmd" target="_blank">d640fba</a>
+</td>
+<td>
+jens-daniel-mueller
+</td>
+<td>
+2024-09-27
+</td>
+<td>
+first TA trend determined
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+<a href="https://rawcdn.githack.com/jens-daniel-mueller/ta_trends/e11285e30828b1d07836d20d1685748e12491bf9/docs/read_glodap.html" target="_blank">e11285e</a>
+</td>
+<td>
+jens-daniel-mueller
+</td>
+<td>
+2024-09-26
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 <a href="https://github.com/jens-daniel-mueller/ta_trends/blob/db7e7274ff4ca19b46b14881e11ce185e7231637/analysis/read_glodap.Rmd" target="_blank">db7e727</a>
 </td>
 <td>
@@ -645,8 +679,265 @@ include G19 comparison
 </div>
 </div>
 </div>
-<div id="introduction" class="section level2">
-<h2>Introduction</h2>
+<pre class="r"><code>center &lt;- -160
+boundary &lt;- center + 180
+target_crs &lt;- paste0(&quot;+proj=robin +over +lon_0=&quot;, center)
+# target_crs &lt;- paste0(&quot;+proj=eqearth +over +lon_0=&quot;, center)
+# target_crs &lt;- paste0(&quot;+proj=eqearth +lon_0=&quot;, center)
+# target_crs &lt;- paste0(&quot;+proj=igh_o +lon_0=&quot;, center)
+
+worldmap &lt;- ne_countries(scale = &#39;small&#39;,
+                         type = &#39;map_units&#39;,
+                         returnclass = &#39;sf&#39;)
+
+worldmap &lt;- worldmap %&gt;% st_break_antimeridian(lon_0 = center)
+worldmap_trans &lt;- st_transform(worldmap, crs = target_crs)
+
+# ggplot() +
+#   geom_sf(data = worldmap_trans)
+
+coastline &lt;- ne_coastline(scale = &#39;small&#39;, returnclass = &quot;sf&quot;)
+coastline &lt;- st_break_antimeridian(coastline, lon_0 = 200)
+coastline_trans &lt;- st_transform(coastline, crs = target_crs)
+
+# ggplot() +
+#   geom_sf(data = worldmap_trans, fill = &quot;grey&quot;, col=&quot;grey&quot;) +
+#   geom_sf(data = coastline_trans)
+
+
+bbox &lt;- st_bbox(c(xmin = -180, xmax = 180, ymax = 65, ymin = -78), crs = st_crs(4326))
+bbox &lt;- st_as_sfc(bbox)
+bbox_trans &lt;- st_break_antimeridian(bbox, lon_0 = center)
+
+bbox_graticules &lt;- st_graticule(
+  x = bbox_trans,
+  crs = st_crs(bbox_trans),
+  datum = st_crs(bbox_trans),
+  lon = c(20, 20.001),
+  lat = c(-78,65),
+  ndiscr = 1e3,
+  margin = 0.001
+)
+
+bbox_graticules_trans &lt;- st_transform(bbox_graticules, crs = target_crs)
+rm(worldmap, coastline, bbox, bbox_trans)
+
+# ggplot() +
+#   geom_sf(data = worldmap_trans, fill = &quot;grey&quot;, col=&quot;grey&quot;) +
+#   geom_sf(data = coastline_trans) +
+#   geom_sf(data = bbox_graticules_trans)
+
+lat_lim &lt;- ext(bbox_graticules_trans)[c(3,4)]*1.002
+lon_lim &lt;- ext(bbox_graticules_trans)[c(1,2)]*1.005
+
+# ggplot() +
+#   geom_sf(data = worldmap_trans, fill = &quot;grey90&quot;, col = &quot;grey90&quot;) +
+#   geom_sf(data = coastline_trans) +
+#   geom_sf(data = bbox_graticules_trans, linewidth = 1) +
+#   coord_sf(crs = target_crs,
+#            ylim = lat_lim,
+#            xlim = lon_lim,
+#            expand = FALSE) +
+#   theme(
+#     panel.border = element_blank(),
+#     axis.text = element_blank(),
+#     axis.ticks = element_blank()
+#   )
+
+latitude_graticules &lt;- st_graticule(
+  x = bbox_graticules,
+  crs = st_crs(bbox_graticules),
+  datum = st_crs(bbox_graticules),
+  lon = c(20, 20.001),
+  lat = c(-60,-30,0,30,60),
+  ndiscr = 1e3,
+  margin = 0.001
+)
+
+latitude_graticules_trans &lt;- st_transform(latitude_graticules, crs = target_crs)
+
+latitude_labels &lt;- data.frame(lat_label = c(&quot;60°N&quot;,&quot;30°N&quot;,&quot;Eq.&quot;,&quot;30°S&quot;,&quot;60°S&quot;),
+                 lat = c(60,30,0,-30,-60)-4, lon = c(35)-c(0,2,4,2,0))
+
+latitude_labels &lt;- st_as_sf(x = latitude_labels,
+               coords = c(&quot;lon&quot;, &quot;lat&quot;),
+               crs = &quot;+proj=longlat&quot;)
+
+latitude_labels_trans &lt;- st_transform(latitude_labels, crs = target_crs)
+
+# ggplot() +
+#   geom_sf(data = worldmap_trans, fill = &quot;grey&quot;, col = &quot;grey&quot;) +
+#   geom_sf(data = coastline_trans) +
+#   geom_sf(data = bbox_graticules_trans) +
+#   geom_sf(data = latitude_graticules_trans,
+#           col = &quot;grey60&quot;,
+#           linewidth = 0.2) +
+#   geom_sf_text(data = latitude_labels_trans,
+#                aes(label = lat_label),
+#                size = 3,
+#                col = &quot;grey60&quot;)</code></pre>
+<pre class="r"><code>path_glodapv2_2023  &lt;- &quot;/nfs/kryo/work/datasets/ungridded/3d/ocean/glodap/v2023&quot;</code></pre>
+<div id="read-files" class="section level1">
+<h1>Read files</h1>
+<div id="adjusted-data" class="section level2">
+<h2>Adjusted data</h2>
+<p>Main data source for this project is
+<code>GLODAPv2.2023_Merged_Master_File.csv</code> downloaded from
+<code>https://www.ncei.noaa.gov/data/oceans/ncei/ocads/data/0283442/GLODAPv2.2023_Merged_Master_File.csv</code>
+on Sep 26, 2024.</p>
+<pre class="r"><code>GLODAP &lt;-
+  read_csv(
+    paste(
+      path_glodapv2_2023,
+      &quot;GLODAPv2.2023_Merged_Master_File.csv&quot;,
+      sep = &quot;/&quot;
+    ),
+    na = &quot;-9999&quot;,
+    col_types = cols(.default = col_double())
+  )
+
+
+GLODAP &lt;- GLODAP %&gt;%
+  rename_with(~str_remove(., &#39;G2&#39;))
+
+GLODAP &lt;- GLODAP %&gt;% 
+  select(expocode:bottomdepth,
+         depth, temperature,
+         contains(c(&quot;salinity&quot;, &quot;talk&quot;, &quot;tco2&quot;)))
+
+
+GLODAP &lt;- GLODAP %&gt;% 
+  filter(!is.na(talk),
+         !is.na(salinity),
+         bottomdepth &gt; 1000,
+         talkf == 2,
+         talkqc == 1,
+         salinityf == 2,
+         salinityqc == 1)</code></pre>
+</div>
+<div id="harmonize-nomenclature" class="section level2">
+<h2>Harmonize nomenclature</h2>
+<pre class="r"><code># create date column
+GLODAP &lt;- GLODAP %&gt;%
+  mutate(date = ymd(paste(year, month, day))) %&gt;%
+  relocate(date)
+
+# harmonize column names
+GLODAP &lt;- GLODAP  %&gt;%
+  rename(sal = salinity,
+         temp = temperature)
+
+# harmonize coordinates
+GLODAP &lt;- GLODAP  %&gt;%
+  rename(lon = longitude,
+         lat = latitude) %&gt;%
+  mutate(lon = if_else(lon &lt; 20, lon + 360, lon))</code></pre>
+</div>
+<div id="horizontal-gridding" class="section level2">
+<h2>Horizontal gridding</h2>
+<p>For merging with other data sets, all observations were grouped into
+latitude intervals of:</p>
+<ul>
+<li>1° x 1°</li>
+</ul>
+<pre class="r"><code>GLODAP &lt;- m_grid_horizontal(GLODAP)
+GLODAP &lt;- m_grid_horizontal_coarse(GLODAP)</code></pre>
+<pre class="r"><code>GLODAP &lt;- GLODAP  %&gt;%
+  mutate(stalk = talk * 35 / sal)
+
+TA_trend &lt;- GLODAP %&gt;%
+  mutate(lat = lat_grid, lon = lon_grid) %&gt;% 
+  mutate(depth_layer = cut(depth, seq(0, 2000, 50))) %&gt;%
+  filter(!is.na(depth_layer)) %&gt;%
+  filter(year &gt;= 1990) %&gt;%
+  group_by(year, lon, lat, depth_layer) %&gt;%
+  summarise(stalk = mean(stalk, na.rm = TRUE)) %&gt;%
+  ungroup() %&gt;%
+  pivot_wider(names_from = depth_layer, values_from = stalk) %&gt;%
+  pivot_longer(-c(1:4), names_to = &quot;reference_depth&quot;) %&gt;%
+  mutate(surface_deep = `(0,50]` - value) %&gt;%
+  drop_na() %&gt;%
+  group_by(lon, lat, reference_depth) %&gt;%
+  mutate(n = n(), delta_year = max(year) - min(year)) %&gt;%
+  ungroup() %&gt;%
+  filter(n &gt;= 2, delta_year &gt;= 10) %&gt;%
+  group_by(reference_depth) %&gt;%
+  mutate(n = n()) %&gt;%
+  ungroup() %&gt;%
+  filter(n &gt;= 0.5 * max(n)) %&gt;%
+  select(year, lon, lat, surface_deep, reference_depth) %&gt;%
+  nest(data = -c(lon, lat, reference_depth)) %&gt;%
+  mutate(fit = map(data, ~ flm(
+    formula = surface_deep ~ year, data = .x
+  ))) %&gt;%
+  unnest_wider(fit) %&gt;%
+  select(lon, lat, reference_depth, slope = year) %&gt;%
+  mutate(slope = as.vector(slope))
+
+
+TA_trend %&gt;% 
+  filter(abs(slope) &lt; 1) %&gt;%
+  ggplot(aes(slope)) +
+  geom_vline(xintercept = 0) +
+  geom_histogram() +
+  facet_wrap(~ reference_depth, ncol = 3)</code></pre>
+<p><img src="figure/read_glodap.Rmd/talk_trends-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>TA_trend %&gt;% 
+  filter(abs(slope) &lt; 1) %&gt;%
+  ggplot(aes(lon, lat, fill = slope)) +
+  geom_tile() +
+  coord_quickmap() +
+  scale_fill_divergent(mid = &quot;grey&quot;) +
+  facet_wrap(~ reference_depth, ncol = 3)</code></pre>
+<p><img src="figure/read_glodap.Rmd/talk_trends-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>GLODAP &lt;- GLODAP  %&gt;%
+  mutate(stco2 = tco2 * 35 / sal)
+
+TA_trend &lt;- GLODAP %&gt;%
+  mutate(lat = lat_grid, lon = lon_grid) %&gt;% 
+  mutate(depth_layer = cut(depth, seq(0, 2000, 50))) %&gt;%
+  filter(!is.na(depth_layer)) %&gt;%
+  filter(year &gt;= 1990) %&gt;%
+  group_by(year, lon, lat, depth_layer) %&gt;%
+  summarise(stco2 = mean(stco2, na.rm = TRUE)) %&gt;%
+  ungroup() %&gt;%
+  pivot_wider(names_from = depth_layer, values_from = stco2) %&gt;%
+  pivot_longer(-c(1:4), names_to = &quot;reference_depth&quot;) %&gt;%
+  mutate(surface_deep = `(0,50]` - value) %&gt;%
+  drop_na() %&gt;%
+  group_by(lon, lat, reference_depth) %&gt;%
+  mutate(n = n(), delta_year = max(year) - min(year)) %&gt;%
+  ungroup() %&gt;%
+  filter(n &gt;= 2, delta_year &gt;= 10) %&gt;%
+  group_by(reference_depth) %&gt;%
+  mutate(n = n()) %&gt;%
+  ungroup() %&gt;%
+  filter(n &gt;= 0.5 * max(n)) %&gt;%
+  select(year, lon, lat, surface_deep, reference_depth) %&gt;%
+  nest(data = -c(lon, lat, reference_depth)) %&gt;%
+  mutate(fit = map(data, ~ flm(
+    formula = surface_deep ~ year, data = .x
+  ))) %&gt;%
+  unnest_wider(fit) %&gt;%
+  select(lon, lat, reference_depth, slope = year) %&gt;%
+  mutate(slope = as.vector(slope))
+
+
+TA_trend %&gt;% 
+  filter(abs(slope) &lt; 5) %&gt;%
+  ggplot(aes(slope)) +
+  geom_vline(xintercept = 0) +
+  geom_histogram() +
+  facet_wrap(~ reference_depth, ncol = 3)</code></pre>
+<p><img src="figure/read_glodap.Rmd/tco2_trends-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>TA_trend %&gt;% 
+  filter(abs(slope) &lt; 5) %&gt;%
+  ggplot(aes(lon, lat, fill = slope)) +
+  geom_tile() +
+  coord_quickmap() +
+  scale_fill_divergent(mid = &quot;grey&quot;) +
+  facet_wrap(~ reference_depth, ncol = 3)</code></pre>
+<p><img src="figure/read_glodap.Rmd/tco2_trends-2.png" width="672" style="display: block; margin: auto;" /></p>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -676,20 +967,51 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] workflowr_1.7.0
+ [1] kableExtra_1.3.4    ggrepel_0.9.2       lubridate_1.9.0    
+ [4] timechange_0.1.1    terra_1.7-65        sf_1.0-9           
+ [7] rnaturalearth_0.1.0 geomtextpath_0.1.1  colorspace_2.0-3   
+[10] marelac_2.1.10      shape_1.4.6         ggforce_0.4.1      
+[13] metR_0.13.0         scico_1.3.1         patchwork_1.1.2    
+[16] collapse_1.8.9      forcats_0.5.2       stringr_1.5.0      
+[19] dplyr_1.1.3         purrr_1.0.2         readr_2.1.3        
+[22] tidyr_1.3.0         tibble_3.2.1        ggplot2_3.4.4      
+[25] tidyverse_1.3.2     workflowr_1.7.0    
 
 loaded via a namespace (and not attached):
- [1] Rcpp_1.0.11       compiler_4.2.2    pillar_1.9.0      bslib_0.4.1      
- [5] later_1.3.0       git2r_0.30.1      jquerylib_0.1.4   tools_4.2.2      
- [9] getPass_0.2-2     digest_0.6.30     jsonlite_1.8.3    evaluate_0.18    
-[13] lifecycle_1.0.3   tibble_3.2.1      pkgconfig_2.0.3   rlang_1.1.1      
-[17] cli_3.6.1         rstudioapi_0.15.0 yaml_2.3.6        xfun_0.35        
-[21] fastmap_1.1.0     httr_1.4.4        stringr_1.5.0     knitr_1.41       
-[25] fs_1.5.2          vctrs_0.6.4       sass_0.4.4        rprojroot_2.0.3  
-[29] glue_1.6.2        R6_2.5.1          processx_3.8.0    fansi_1.0.3      
-[33] rmarkdown_2.18    callr_3.7.3       magrittr_2.0.3    whisker_0.4      
-[37] ps_1.7.2          promises_1.2.0.1  htmltools_0.5.3   httpuv_1.6.6     
-[41] utf8_1.2.2        stringi_1.7.8     cachem_1.0.6     </code></pre>
+ [1] googledrive_2.0.0       ellipsis_0.3.2          class_7.3-20           
+ [4] rprojroot_2.0.3         fs_1.5.2                rstudioapi_0.15.0      
+ [7] proxy_0.4-27            farver_2.1.1            bit64_4.0.5            
+[10] fansi_1.0.3             xml2_1.3.3              codetools_0.2-18       
+[13] cachem_1.0.6            knitr_1.41              polyclip_1.10-4        
+[16] jsonlite_1.8.3          gsw_1.1-1               broom_1.0.5            
+[19] dbplyr_2.2.1            compiler_4.2.2          httr_1.4.4             
+[22] backports_1.4.1         assertthat_0.2.1        fastmap_1.1.0          
+[25] gargle_1.2.1            cli_3.6.1               later_1.3.0            
+[28] tweenr_2.0.2            htmltools_0.5.3         tools_4.2.2            
+[31] rnaturalearthdata_0.1.0 gtable_0.3.1            glue_1.6.2             
+[34] Rcpp_1.0.11             cellranger_1.1.0        jquerylib_0.1.4        
+[37] vctrs_0.6.4             svglite_2.1.0           xfun_0.35              
+[40] ps_1.7.2                rvest_1.0.3             lifecycle_1.0.3        
+[43] googlesheets4_1.0.1     oce_1.7-10              getPass_0.2-2          
+[46] MASS_7.3-58.1           scales_1.2.1            vroom_1.6.0            
+[49] hms_1.1.2               promises_1.2.0.1        parallel_4.2.2         
+[52] yaml_2.3.6              memoise_2.0.1           sass_0.4.4             
+[55] stringi_1.7.8           highr_0.9               e1071_1.7-12           
+[58] checkmate_2.1.0         rlang_1.1.1             pkgconfig_2.0.3        
+[61] systemfonts_1.0.4       evaluate_0.18           lattice_0.20-45        
+[64] SolveSAPHE_2.1.0        labeling_0.4.2          bit_4.0.5              
+[67] processx_3.8.0          tidyselect_1.2.0        seacarb_3.3.1          
+[70] magrittr_2.0.3          R6_2.5.1                generics_0.1.3         
+[73] DBI_1.1.3               pillar_1.9.0            haven_2.5.1            
+[76] whisker_0.4             withr_2.5.0             units_0.8-0            
+[79] sp_1.5-1                modelr_0.1.10           crayon_1.5.2           
+[82] KernSmooth_2.23-20      utf8_1.2.2              tzdb_0.3.0             
+[85] rmarkdown_2.18          grid_4.2.2              readxl_1.4.1           
+[88] data.table_1.14.6       callr_3.7.3             git2r_0.30.1           
+[91] webshot_0.5.4           reprex_2.0.2            digest_0.6.30          
+[94] classInt_0.4-8          httpuv_1.6.6            textshaping_0.3.6      
+[97] munsell_0.5.0           viridisLite_0.4.1       bslib_0.4.1            </code></pre>
+</div>
 </div>
 </div>
 
